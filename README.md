@@ -9,3 +9,4 @@ You want to display swiftDialog with a custom timeout on making the button(s) ac
 - due to the way shell works with child processes you can not use `/usr/local/bin/dialog`
 - because we are not using `/usr/local/bin/dialog` we need to ensure that swiftDialog launches correctly when the script is run as root. We do this using `launchtl`
 - if the swiftDialog is quit or the user clicks the info button before the sleep delay ends the script continues until the delay ends. This does not affect the result in any way. If I find a way around this I'll update the script
+- if you have `--infobuttontext` you can not have this disabled then enabled as part of the script. This is by swiftDialog design
