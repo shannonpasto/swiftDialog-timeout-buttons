@@ -59,9 +59,10 @@ EOF
 
 # wait here for the user to make a choice
 wait $my_pid
+# the user has made their choice so capture the exit code
 my_exit=$?
 
-# the user has made a choice, now do something based on the choice
+# evaluate the exit code in a case statement and do something based on the choice
 case $my_exit in
   0)
     echo "dialog return code $my_exit"
