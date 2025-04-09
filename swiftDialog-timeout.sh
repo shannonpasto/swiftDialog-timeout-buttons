@@ -8,15 +8,15 @@
 ##########
 
 # set a few variable
-dialogbin="/Library/Application Support/Dialog/Dialog.app/Contents/MacOS/Dialog"
-commandfile="/var/tmp/dialog.log"
-delay=$(jot -r 1 5 15) # this will choose a random number between 5 and 15
+dialogBin="/Library/Application Support/Dialog/Dialog.app/Contents/MacOS/Dialog"
+commandFile="/var/tmp/dialog.log"
+delaySec=$(/usr/bin/jot -r 1 5 15) # this will choose a random number between 5 and 15
 
 # if we are root launch as the user in case we run from MDM like Jamf
-if [ $(id -u) -eq 0 ]; then
-  if [ ! -z $commandfile ]; then
-    touch $commandfile
-    chmod 644 $commandfile
+if [ "$(/usr/bin/id -u)" -eq 0 ]; then
+  if [ -n "${commandFile}" ]; then
+    /usr/bin/touch "${commandFile}"
+    /bin/chmod 644 "${commandFile}"
   fi
 
   # get the loggedon username and user id
@@ -24,7 +24,7 @@ if [ $(id -u) -eq 0 ]; then
   CurrentlyLoggedInUserUID=$(/usr/bin/id -u "${CurrentlyLoggedInUser}")
 
   # run dialog as the user
-  launchctl asuser $CurrentlyLoggedInUserUID "$dialogbin" \
+  /bin/launchctl asuser "${CurrentlyLoggedInUserUID}" "${dialogBin}" \
     --title Title \
     --message Message \
     --button1text OK \
@@ -33,7 +33,7 @@ if [ $(id -u) -eq 0 ]; then
     --button1disabled \
     --button2disabled &
 else
-  "$dialogbin" \
+  "${dialogBin}" \
     --title Title \
     --message Message \
     --button1text OK \
@@ -43,41 +43,41 @@ else
     --button2disabled &
 fi
 
-# do a quick sleep to make sure the dialog is up and running and the commandfile is in place
+# do a quick sleep to make sure the dialog is up and running and the commandFile is in place
 sleep 0.5
 # get the pid of the running dialog
-my_pid=$(pgrep Dialog)
+myPID=$(/usr/bin/pgrep Dialog)
 
 # sleep for the specified amount of time
-sleep $delay
+sleep "${delaySec}"
 
 # activate the buttons
-cat << EOF >> $commandfile
+/bin/cat << EOF >> "${commandFile}"
 button1: enabled
 button2: enabled
 EOF
 
 # wait here for the user to make a choice
-wait $my_pid
+wait "${myPID}"
 # the user has made their choice so capture the exit code
-my_exit=$?
+myExit=$?
 
 # evaluate the exit code in a case statement and do something based on the choice
-case $my_exit in
+case "${myExit}" in
   0)
-    echo "dialog return code $my_exit"
+    /bin/echo "OK clicked. dialog return code ${myExit}"
     ;;
 
   2)
-    echo "dialog return code $my_exit"
+    /bin/echo "Cancel clicked. dialog return code ${myExit}"
     ;;
 
   3)
-    echo "dialog return code $my_exit"
+    /bin/echo "Help clicked. dialog return code ${myExit}"
     ;;
 
   *)
-    echo "dialog return code $my_exit"
+    /bin/echo "Unknown error or dialog quit. dialog return code ${myExit}"
     ;;
 
 esac
